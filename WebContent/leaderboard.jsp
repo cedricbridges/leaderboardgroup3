@@ -32,11 +32,18 @@
 <%@include file="leaderboard_student.jsp" %>
 
 	<%
+		
+	
+	
+	
+	
 		// get the current user
 		User sessionUser = ctx.getUser();
 		Id courseID = ctx.getCourseId();		
 		String sessionUserRole = ctx.getCourseMembership().getRoleAsString();	
 		String sessionUserID = sessionUser.getId().toString();
+		
+		//AttemptVO test = new AttemptVO();
 		
 		// use the GradebookManager to get the gradebook data
 		GradebookManager gm = GradebookManagerFactory.getInstanceWithoutSecurityCheck();
@@ -94,8 +101,9 @@
 				Double currScore = 0.0;	
 				
 				if(gwas2 != null && !gwas2.isNullGrade()) {
-					currScore = gwas2.getScoreValue();	 
-				}						
+					currScore = gwas2.getScoreValue();
+				}	
+
 				if (gi.getTitle().trim().toLowerCase().equalsIgnoreCase(grade_choice)) {
 					if (sessionUserID.equals(currentUserID)) {
 						scoreToHighlight = currScore;
@@ -112,6 +120,7 @@
 						String[] hiddenArr = b2Context_show_hide.getSetting(false, true, "hiddenStudents" + courseID.toExternalString()).split(",");
 						String stuName = cm.getUser().getGivenName() +" " + cm.getUser().getFamilyName() + ": " + cm.getUser().getUserName();
 						for(int l = 0; l < hiddenArr.length; l++){
+							//possibly add date if statement
 							if(stuName.equals(sessionUserName)){//Only add user if they're the session user.
 								students.add(new Student(cm.getUser().getGivenName(), cm.getUser().getFamilyName(), currScore, cm.getUser().getUserName()));
 								break;
@@ -134,9 +143,30 @@
 			}
 			index = index + 1;
 		}
+		//Group 3 changes
+		//Students are sorted here so that their ranking is in order
 		Collections.sort(students);
 		Collections.reverse(students);
-			
+		
+		B2Context b2Context_rank = new B2Context(request);
+		
+		String prevRankString = b2Context_rank.getSetting(true,true,courseID.toExternalString() + sessionUserID + "_Rank");
+		int prevRank = 0;
+		
+		if(prevRankString != ""){
+			prevRank = Integer.parseInt(prevRankString);
+		}
+
+		//This loop sets the previous rank for the student and saves the current rank as the next previous rank
+		for(int num = 0; num < students.size(); num++){
+			if(sessionUser.getUserName().equals(students.get(num).getUserName())){
+				students.get(num).setPrevRank(prevRank);	
+				students.get(num).setCurrentRank(num + 1);
+				b2Context_rank.setSetting(true,true,courseID.toExternalString() + sessionUserID + "_Rank",Integer.toString(students.get(num).getCurrentRank()));
+				b2Context_rank.persistSettings(true, true);
+			}
+		}
+		//End of group 3 changes
 	%>		
 	
 		<script type="text/javascript">		
@@ -187,7 +217,9 @@
 	 							//If the user is a student, just output "You" next to this bar
 	 							else if(sessionUser.getGivenName().equals(firstName) && sessionUser.getFamilyName().equals(lastName)
 	 									&& sessionUser.getUserName().equals(userName)){
-	 								out.print("'You'");
+	 								//Group 3 change below
+	 								//Method getStanding returns either "+", "-", or " " depending on students' last ranking
+	 								out.print('"' + students.get(x).getStanding() + ' ' + firstName.substring(0, 1) + ' ' + lastName + '"');
 	 								//out.print('"' + firstName.substring(0, 1) + ' ' + lastName + '"');   						
 	 							}	  							
 	  							//Else, just add a number

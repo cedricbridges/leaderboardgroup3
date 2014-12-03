@@ -5,6 +5,10 @@ final class Student implements Comparable<Student> {
     public String lastName;
     private boolean hidden;
     private String userName;
+    private int prevRank;
+    private int currentRank;
+    private String statStanding;
+
     
     public Student(String firstName, String lastName, Double score, String userName) {
         this.score = score;
@@ -12,6 +16,7 @@ final class Student implements Comparable<Student> {
         this.lastName = lastName;
         this.hidden = false;
         this.userName = userName;
+        this.prevRank = 0;
     }
     
     public String getUserName(){
@@ -28,6 +33,35 @@ final class Student implements Comparable<Student> {
     	}
     	else { return 0; }	    	
     }
+    //Group 3 changes
+    public void setCurrentRank(int currentRank){
+    	this.currentRank = currentRank;
+    	if(this.currentRank < this.prevRank){
+    		statStanding = "+";
+    	}
+    	else if(this.currentRank > this.prevRank){
+    		statStanding = "-";
+    	}
+    	else
+    		statStanding = " ";
+    }
+    
+    public int getCurrentRank(){
+    	return currentRank;
+    }
+    
+    public String getStanding(){
+    	return statStanding;
+    }
+    
+    public void setPrevRank(int prevRank){
+    	this.prevRank = prevRank;
+    }
+    
+    public void resetRank(){
+    	this.currentRank = 0;
+    }
+    //End of group 3 changes
     public void setHidden(boolean hidden) {
     	this.hidden = hidden;
     }
